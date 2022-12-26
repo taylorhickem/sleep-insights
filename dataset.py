@@ -19,14 +19,21 @@ DATASETS = {}
 def update():
     global DATASETS
     db.load()
-    time_format = db.GSHEET_CONFIG['sleep']['sheets']['dataset']['time_format']
+    gs_data = db.get_sheet('sleep', 'events')
+    sql_data = format_events(gs_data)
+    db.update_table(sql_data, 'sleep', False)
+    DATASETS['events'] = sql_data
 
-    gs_data = db.get_sheet('sleep', 'dataset')
-    gs_data['date'] = gs_data['date'].apply(lambda x: x.date())
-    gs_data['time'] = gs_data['time'].apply(
+
+def format_events(gs_data):
+    time_format = db.GSHEET_CONFIG['sleep']['sheets']['events']['time_format']
+    sql_data = gs_data.copy()
+    sql_data['date'] = sql_data['date'].apply(lambda x: x.date())
+    sql_data['time'] = sql_data['time'].apply(
         lambda x: dt.datetime.strptime(x, time_format))
-    db.update_table(gs_data, 'sleep', False)
-    DATASETS['gs_data'] = gs_data
+    return sql_data
+
+
 
 # -----------------------------------------------------
 # Command line
