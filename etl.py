@@ -7,7 +7,6 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 
-
 TABLE_SCHEMA = {
     'nights': {
         'date': dt.date,
@@ -45,6 +44,11 @@ def nights_update():
 
 
 def nights_from_events(events):
+    # remove naps
+    events = events[events['comment'].apply(
+        lambda x: 'nap' not in x if x is not None else True
+    )].copy()
+
     # convert from str to datetime
     events['timestamp'] = events.apply(
         lambda x: dt.datetime.combine(
